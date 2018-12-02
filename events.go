@@ -11,12 +11,24 @@ import (
 	"github.com/nlopes/slack/slackevents"
 )
 
-const TOKEN = "xoxb-222707315955-395033242117-xXN44aHB2Ahl3r0MxaVgMOnQ"
+// You more than likely want your "Bot User OAuth Access Token"
+func getOauthToken(): string {
+	dat, err := ioutil.ReadFile("./secrets/oauth")
+	check(err)
+	return string(dat)
+}
 
-// You more than likely want your "Bot User OAuth Access Token" which starts with "xoxb-"
-var api = slack.New(TOKEN)
+func getVerificationToken(): string {
+	dat, err := ioutil.ReadFile("./secrets/slack")
+	check(err)
+	return string(dat)
+}
 
 func main() {
+	const oauthToken = getOauthToken();
+	const verificationToken = getVerificationToken();
+	let api = slack.New(oauthToken);
+
 	http.HandleFunc("/slack/event", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("handling event")
 		buf := new(bytes.Buffer)
@@ -25,7 +37,8 @@ func main() {
 		log.Println("body:")
 		log.Println(body)
 
-		eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{"hLzQ6ZOhVRC4LaN6yxJ0SRah"}))
+		eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body),
+					slackevents.OptionVerifyToken(&slackevents.TokenComparator{verificationToken}))
 		if e != nil {
 			log.Println("internal server error - parseEvent")
 			w.WriteHeader(http.StatusInternalServerError)
