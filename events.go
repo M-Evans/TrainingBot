@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"io/ioutil"
 	"net/http"
 
@@ -16,32 +15,37 @@ import (
 func getOauthToken() string {
 	dat, err := ioutil.ReadFile("./secrets/oauth")
 	if (err != nil) { panic(err) }
-	return string(dat)
+	var ret = string(dat)
+	return ret[:len(ret)-1]
 }
 
 func getVerificationToken() string {
 	dat, err := ioutil.ReadFile("./secrets/slack")
 	if (err != nil) { panic(err) }
-	return string(dat)
+	var ret = string(dat)
+	return ret[:len(ret)-1]
 }
 
 func main() {
 	var oauthToken = getOauthToken();
 	var verificationToken = getVerificationToken();
+	fmt.Printf("oauthToken: '%s'", oauthToken)
+	fmt.Printf("verificationToken: '%s'", verificationToken)
 	var api = slack.New(oauthToken);
 
 	http.HandleFunc("/slack/event", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("handling event")
+		fmt.Println("handling event")
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(r.Body)
 		body := buf.String()
-		log.Println("body:")
-		log.Println(body)
+		fmt.Println("body:")
+		fmt.Println(body)
 
 		eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body),
-					slackevents.OptionVerifyToken(&slackevents.TokenComparator{verificationToken}))
+					slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: verificationToken}))
 		if e != nil {
-			log.Println("internal server error - parseEvent")
+			fmt.Println(e)
+			fmt.Println("internal server error - parseEvent")
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
@@ -49,7 +53,7 @@ func main() {
 			var r *slackevents.ChallengeResponse
 			err := json.Unmarshal([]byte(body), &r)
 			if err != nil {
-				log.Println("internal server error - unmarshal request json")
+				fmt.Println("internal server error - unmarshal request json")
 				w.WriteHeader(http.StatusInternalServerError)
 			}
 			w.Header().Set("Content-Type", "text")
@@ -59,7 +63,7 @@ func main() {
 			innerEvent := eventsAPIEvent.InnerEvent
 			switch ev := innerEvent.Data.(type) {
 				case *slackevents.AppMentionEvent:
-					api.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
+					api.PostMessage(ev.Channel, slack.MsgOptionText("At your service.", false))
 			}
 		}
 	})

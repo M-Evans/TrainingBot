@@ -1,0 +1,14 @@
+[Unit]
+Description=Trainingbot
+After=network.target
+
+[Service]
+Type=simple
+User=trainingbot
+WorkingDirectory=/home/trainingbot/go/src/github.com/m-evans/trainingbot
+ExecStart=/usr/bin/sudo /home/trainingbot/go/src/github.com/m-evans/trainingbot/events
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
