@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/nlopes/slack"
@@ -12,22 +13,22 @@ import (
 )
 
 // You more than likely want your "Bot User OAuth Access Token"
-func getOauthToken(): string {
+func getOauthToken() string {
 	dat, err := ioutil.ReadFile("./secrets/oauth")
-	check(err)
+	if (err != nil) { panic(err) }
 	return string(dat)
 }
 
-func getVerificationToken(): string {
+func getVerificationToken() string {
 	dat, err := ioutil.ReadFile("./secrets/slack")
-	check(err)
+	if (err != nil) { panic(err) }
 	return string(dat)
 }
 
 func main() {
-	const oauthToken = getOauthToken();
-	const verificationToken = getVerificationToken();
-	let api = slack.New(oauthToken);
+	var oauthToken = getOauthToken();
+	var verificationToken = getVerificationToken();
+	var api = slack.New(oauthToken);
 
 	http.HandleFunc("/slack/event", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("handling event")
@@ -55,11 +56,10 @@ func main() {
 			w.Write([]byte(r.Challenge))
 		}
 		if eventsAPIEvent.Type == slackevents.CallbackEvent {
-			postParams := slack.PostMessageParameters{}
 			innerEvent := eventsAPIEvent.InnerEvent
 			switch ev := innerEvent.Data.(type) {
-			case *slackevents.AppMentionEvent:
-				api.PostMessage(ev.Channel, "Yes, hello.", postParams)
+				case *slackevents.AppMentionEvent:
+					api.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
 			}
 		}
 	})
