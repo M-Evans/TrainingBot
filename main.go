@@ -7,17 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/nlopes/slack"
 	"github.com/nlopes/slack/slackevents"
 )
-
-// You more than likely want your "Bot User OAuth Access Token"
-func getOauthToken() string {
-	dat, err := ioutil.ReadFile("./secrets/oauth")
-	if (err != nil) { panic(err) }
-	var ret = string(dat)
-	return ret[:len(ret)-1]
-}
 
 func getVerificationToken() string {
 	dat, err := ioutil.ReadFile("./secrets/slack")
@@ -27,11 +18,7 @@ func getVerificationToken() string {
 }
 
 func main() {
-	var oauthToken = getOauthToken();
 	var verificationToken = getVerificationToken();
-	fmt.Printf("oauthToken: '%s'", oauthToken)
-	fmt.Printf("verificationToken: '%s'", verificationToken)
-	var api = slack.New(oauthToken);
 
 	http.HandleFunc("/slack/event", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("handling event")
@@ -60,13 +47,10 @@ func main() {
 			w.Write([]byte(r.Challenge))
 		}
 		if eventsAPIEvent.Type == slackevents.CallbackEvent {
-			innerEvent := eventsAPIEvent.InnerEvent
-			switch ev := innerEvent.Data.(type) {
-				case *slackevents.AppMentionEvent:
-					api.PostMessage(ev.Channel, slack.MsgOptionText("At your service.", false))
-			}
+			handle(eventsAPIEvent.InnerEvent);
 		}
 	})
+
 	fmt.Println("[INFO] Server listening")
 	if err := http.ListenAndServe(":710", nil); err != nil {
 		panic(err)
