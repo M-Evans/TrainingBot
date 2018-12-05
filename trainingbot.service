@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=trainingbot
 WorkingDirectory=/home/trainingbot/go/src/github.com/m-evans/trainingbot
-ExecStart=/usr/bin/sudo /home/trainingbot/go/src/github.com/m-evans/trainingbot/events
+ExecStart=/usr/bin/sudo /home/trainingbot/go/src/github.com/m-evans/trainingbot/trainingbot
 Restart=always
 
 [Install]
