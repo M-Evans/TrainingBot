@@ -21,8 +21,13 @@ func handle(event slackevents.EventsAPIInnerEvent) {
 	var api = slack.New(oauthToken);
 	fmt.Printf("event: %v", event)
 	switch ev := event.Data.(type) {
-		case *slackevents.AppMentionEvent:
-			api.PostMessage(ev.Channel, slack.MsgOptionText("At your service.", false))
+	case *slackevents.AppMentionEvent:
+		api.PostMessage(ev.Channel, slack.MsgOptionText("At your service.", false))
+	case *slackevents.MessageEvent:
+		fmt.Printf("ev: %v", ev)
+		if (ev.Channel == "CCUDKKFT5" && ev.BotID == "") {
+			api.PostMessage(ev.Channel, slack.MsgOptionText(ev.Text, false))
+		}
 	}
 }
 
