@@ -28,10 +28,10 @@ func main() {
 		fmt.Println("body:")
 		fmt.Println(body)
 
-		eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body),
+		eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(body),
 					slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: verificationToken}))
-		if e != nil {
-			fmt.Println(e)
+		if err != nil {
+			fmt.Println(err)
 			fmt.Println("internal server error - parseEvent")
 			w.WriteHeader(http.StatusInternalServerError)
 		}
