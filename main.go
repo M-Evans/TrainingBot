@@ -11,9 +11,11 @@ import (
 )
 
 func getVerificationToken() string {
-	dat, err := ioutil.ReadFile("./secrets/slack")
-	if (err != nil) { panic(err) }
-	var ret = string(dat)
+	data, err := ioutil.ReadFile("./secrets/slack")
+	if (err != nil) {
+		panic(err)
+	}
+	var ret = string(data)
 	return ret[:len(ret)-1]
 }
 
