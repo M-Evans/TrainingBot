@@ -34,6 +34,7 @@ func checkWeightMeasurement(message string, user string, channel string) {
 	var re = regexp.MustCompile("^(\\d+\\.\\d+) this morning$")
 	var match = re.FindStringSubmatch(message)
 	if (len(match) >= 2) {
+		// TODO: store results in a google spreadsheet
 		var dir = "./data/" + user
 		os.Mkdir(dir, 0640)
 		var weightFile = dir + "/weight"
